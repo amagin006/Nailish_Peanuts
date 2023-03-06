@@ -13,8 +13,16 @@
     "noEmit": true,
     "target": "esnext",
     "noImplicitAny": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./src/*"]
+    }
   },
   "typeRoots": ["./src/types"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"]
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ]
 }
