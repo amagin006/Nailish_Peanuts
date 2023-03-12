@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
-import { NavigatorScreenParams } from '@react-navigation/native';
-// import { firebaseAuth } from '~/config/Firebase';
+import React, { useState, useEffect } from "react";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
+import { NavigatorScreenParams } from "@react-navigation/native";
+import {
+  MainStackNavParamList,
+  MainStackScreens,
+} from "@src/navigation/MainStackScreens";
 
-// // Redux
-// import { useAppSelector, useAppDispatch } from '~/redux/hooks';
-// import { userSet, userUnSet } from '~/redux/user/actions';
+// redux
+import { auth } from "@src/config/Firebase";
+import { useAppDispatch, useAppSelector } from "@src/store";
+import { logout, setUser, userUid } from "@src/store/user/userSlice";
 
 // Screens
-import Splash, { SplashStackParamList } from '@src/screens/Splash';
-import Login from '@src/screens/Login/Login';
-import { MainStackNavParamList, MainStackScreens } from '@src/navigation/MainStackScreens';
+import Splash, { SplashStackParamList } from "@src/screens/Splash";
+import Login from "@src/screens/Login/Login";
 
 export type RootStackParamList = {
   MainNav: NavigatorScreenParams<MainStackNavParamList>;
@@ -22,41 +28,31 @@ const SplashNav = createStackNavigator<SplashStackParamList>();
 
 const RootNavigator = () => {
   // redux
-  // const dispatch = useAppDispatch();
-  // const userToken = useAppSelector(state => state.user.uid);
-
-  const userToken = false
+  const dispatch = useAppDispatch();
+  const reduxUserUid = useAppSelector(userUid);
 
   const [splash, setSplash] = useState(true);
 
-  // useEffect(() => {
-  //   const unsubscribe = _onAuthStateChanged();
-  //   return unsubscribe;
-  // }, []);
-
   useEffect(() => {
-    setTimeout(() => {
-      setSplash(false)
-    }, 5000)
-  }, [])
-
+    const unsubscribe = _onAuthStateChanged();
+    return unsubscribe;
+  }, []);
 
   const _tokenLoadFinished = () => {
     setSplash(false);
   };
 
-  // function _onAuthStateChanged() {
-  //   return firebaseAuth.onAuthStateChanged(user => {
-  //     if (user) {
-  //       // navigation.navigate('CustomerListHome');
-  //       dispatch(userSet(user));
-  //     } else {
-  //       console.log('user logout-------onAuthStateChanged-------', user);
-  //       dispatch(userUnSet());
-  //     }
-  //   });
-  // }
-
+  function _onAuthStateChanged() {
+    return auth.onAuthStateChanged((user) => {
+      if (user) {
+        if (!reduxUserUid) {
+          dispatch(setUser({ uid: user.uid }));
+        }
+      } else {
+        dispatch(logout());
+      }
+    });
+  }
 
   if (splash) {
     return (
@@ -75,15 +71,19 @@ const RootNavigator = () => {
         ...TransitionPresets.SlideFromRightIOS,
         animationEnabled: false,
         headerShown: false,
-      })}>
-      {userToken ? (
+      })}
+    >
+      {reduxUserUid ? (
         <RootStackNav.Screen name="MainNav" component={MainStackScreens} />
       ) : (
-        <RootStackNav.Screen name="LoginNav" component={Login} options={{ headerShown: false }} />
+        <RootStackNav.Screen
+          name="LoginNav"
+          component={Login}
+          options={{ headerShown: false }}
+        />
       )}
     </RootStackNav.Navigator>
   );
 };
 
 export default RootNavigator;
-
