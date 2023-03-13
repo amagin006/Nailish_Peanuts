@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,78 +7,43 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-import { useSelector } from "react-redux";
 
 // redux
 import { useAppDispatch, useAppSelector } from "@src/store";
-import { userSelector } from "@src/store/user/userSlice";
-import { createUser } from "@src/store/user/api";
-// import { useAppDispatch, useAppSelector } from "~/redux/hooks";
-
-// util
-// import { firebaseAuth } from "~/config/Firebase";
+import { confirmedError, userSelector } from "@src/store/user/userSlice";
+import { createUser, userLoginWithPass } from "@src/store/user/api";
 
 // component
 import { ButtonColors, RoundButton } from "@src/components/Button/Button";
-// import {
-//   userLoginWithPass,
-//   googleLogin,
-//   createUser,
-//   failedConfirm,
-// } from "~/redux/auth/actions";
 import {
   TextInput,
   PasswordTextInput,
 } from "@src/components/TextInput/TextInput";
 import { Text } from "@src/components/Text/Text";
 import { BaseActivityIndicator } from "@src/components/Indicator/BaseActivityIndicator";
+import { ForgetPasswordModal } from "@src/screens/Login/components/ForgetPasswordModal";
 
 // style
 import { AppGeneralColor } from "@src/styles/ColorStyle";
-
-// import { FaliedConfirmModal, ForgetModal } from "./components/Modals";
+import { FailedConfirmModal } from "@src/screens/Login/components/FailedConfirmModal";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
-  const [forgetEmail, setForgetEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [emailPassError, setEmailPassError] = useState<boolean>(false);
-  const [forgetEmailError, setForgetEmailError] = useState<boolean>(false);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [isForgetModalVisible, setIsForgetModalVisible] =
     useState<boolean>(false);
-  const [isSendSuccess, setIsSendSuccess] = useState<boolean>(false);
-  const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
-  const [createFailedMessage, setCreateFailedMessage] = useState<string>("");
-  const [loginFailedMessage, setLoginFailedMessage] = useState<string>("");
 
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector(userSelector);
-  const state = useSelector((state) => state);
-  // const dispatch = useAppDispatch();
-  // const reduxState = useAppSelector((state) => state);
-
-  // useEffect(() => {
-  //   const { auth } = reduxState;
-
-  //   if (auth.createFailedMessage) {
-  //     setCreateFailedMessage(auth.createFailedMessage);
-  //   } else {
-  //     setCreateFailedMessage("");
-  //   }
-  //   if (auth.loginFailedMessage) {
-  //     setLoginFailedMessage(auth.loginFailedMessage);
-  //   } else {
-  //     setLoginFailedMessage("");
-  //   }
-  // }, [reduxState]);
+  const user = useAppSelector(userSelector);
 
   const _onLoginWithEmail = () => {
-    // if (email && password) {
-    //   dispatch(userLoginWithPass(email, password));
-    // } else {
-    //   setEmailPassError(true);
-    // }
+    if (email && password) {
+      dispatch(userLoginWithPass({ email, password }));
+    } else {
+      setEmailPassError(true);
+    }
   };
 
   const _googleLogin = () => {
@@ -94,62 +59,27 @@ const Login: React.FC = () => {
     setIsSignUp(true);
   };
 
-  const _onResetPassword = async () => {
-    // setIsSendLoading(true);
-    // try {
-    //   await firebaseAuth.sendPasswordResetEmail(forgetEmail);
-    //   setForgetEmail("");
-    //   setIsSendSuccess(true);
-    // } catch (error) {
-    //   console.log("Error forgetPassword send email: ", error);
-    //   setForgetEmailError(true);
-    // }
-    // setIsSendLoading(false);
-  };
-
-  const _onResetCancel = () => {
+  const _onCloseForgetPasswordModal = () => {
     setIsForgetModalVisible(false);
-    setForgetEmailError(false);
-    setForgetEmail("");
   };
 
-  const _onForgetModal = () => {
-    setIsForgetModalVisible(false);
-    setIsSendSuccess(false);
-  };
-
-  const isError = forgetEmailError || emailPassError;
-
-  console.log("state user", user);
   return (
     <SafeAreaView style={styles.wrapper}>
-      {/* {reduxState.auth.isLoadingLogin ? ( */}
-      {false ? (
+      {user.status === "loading" ? (
         <BaseActivityIndicator />
       ) : (
         <>
-          {/* {isForgetModalVisible ? (
-            <ForgetModal
-              visible={isForgetModalVisible}
-              onRequestClose={() => setIsForgetModalVisible(false)}
-              onPressOk={_onForgetModal}
-              onChangeText={(text) => setForgetEmail(text)}
-              onFocusInput={() => setForgetEmailError(false)}
-              onPressSend={_onResetPassword}
-              onPressCancel={_onResetCancel}
-              isLoading={isSendLoading}
-              isSendSuccess={isSendSuccess}
-              forgetEmailError={forgetEmailError}
-              error={isError}
-            />
-          ) : createFailedMessage || loginFailedMessage ? (
-            <FaliedConfirmModal
-              visible={!!createFailedMessage || !!loginFailedMessage}
-              onRequestClose={() => dispatch(failedConfirm())}
-              modalInnerStyle={{ justifyContent: "space-around" }}
-              onPressOk={() => dispatch(failedConfirm())}
-            />
-          ) : null} */}
+          <ForgetPasswordModal
+            visible={isForgetModalVisible}
+            onRequestClose={() => setIsForgetModalVisible(false)}
+            onClose={_onCloseForgetPasswordModal}
+          />
+          <FailedConfirmModal
+            visible={!!user.error || user.status === "failed"}
+            onRequestClose={() => dispatch(confirmedError())}
+            modalInnerStyle={{ justifyContent: "space-around" }}
+            onPressOk={() => dispatch(confirmedError())}
+          />
           <Image
             style={styles.logoImage}
             resizeMode={"contain"}
@@ -168,7 +98,7 @@ const Login: React.FC = () => {
               placeholder={"Enter your email"}
               onFocus={() => setEmailPassError(false)}
               autoCapitalize={"none"}
-              error={isError}
+              error={emailPassError}
             />
             <PasswordTextInput
               containerStyle={styles.inputTextBox}
@@ -177,11 +107,19 @@ const Login: React.FC = () => {
               placeholder={"Enter your password"}
               onFocus={() => setEmailPassError(false)}
               autoCapitalize={"none"}
-              error={isError}
+              error={emailPassError}
               isPassword={true}
             />
             {isSignUp ? (
-              <RoundButton onPress={_onCreateUser} text={"Create Account"} />
+              <>
+                <View style={{ marginTop: 24 }} />
+                <View style={styles.loginButtonWrapper}>
+                  <RoundButton
+                    onPress={_onCreateUser}
+                    text={"Create Account"}
+                  />
+                </View>
+              </>
             ) : (
               <>
                 <TouchableOpacity

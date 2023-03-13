@@ -18,6 +18,7 @@ interface BaseButtonProps {
   text?: string;
   textStyle?: TextStyle;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export const ButtonColors = {
@@ -51,14 +52,15 @@ const createButtonColor = (type: ButtonColorType | undefined) => {
 
 export function BaseButton(props: BaseButtonProps): JSX.Element {
   const buttonColor = createButtonColor(props.buttonColorType);
-  const color = props.disabled
+  const disabledState = props.isLoading || props.disabled;
+  const color = disabledState
     ? styles.buttonDisabled
     : buttonColor || styles.defaultColor;
   return (
     <View style={props.containerStyle}>
       <TouchableOpacity
         onPress={props.onPress}
-        disabled={props.disabled}
+        disabled={disabledState}
         style={[styles.buttonWrapper, color, props.style]}
       >
         {props.text && (
@@ -79,18 +81,21 @@ interface RoundButtonProps {
   textStyle?: TextStyle;
   iconLeft?: ReactElement;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export function RoundButton(props: RoundButtonProps): JSX.Element {
   const buttonColor = createButtonColor(props.buttonColorType);
-  const color = props.disabled
+  const disabledState = props.isLoading || props.disabled;
+  const color = disabledState
     ? styles.buttonDisabled
     : buttonColor || styles.defaultColor;
+
   return (
     <View style={props.containerStyle}>
       <TouchableOpacity
         onPress={props.onPress}
-        disabled={props.disabled}
+        disabled={disabledState}
         style={[styles.roundButtonWrapper, color, props.style]}
       >
         {props.iconLeft && <>{props.iconLeft}</>}

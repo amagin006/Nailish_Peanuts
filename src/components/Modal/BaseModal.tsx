@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Modal,
@@ -6,8 +6,8 @@ import {
   StyleSheet,
   ViewStyle,
   TouchableWithoutFeedback,
-} from 'react-native';
-import { AppGeneralColor } from '@src/styles/ColorStyle';
+} from "react-native";
+import { AppGeneralColor } from "@src/styles/ColorStyle";
 
 interface BaseModalProps extends ModalProps {
   visible: boolean;
@@ -21,35 +21,37 @@ interface BaseModalProps extends ModalProps {
 export function BaseModal(props: BaseModalProps): JSX.Element {
   return (
     <Modal
-      animationType={props.animationType || 'fade'}
+      animationType={props.animationType || "fade"}
       transparent={true}
       visible={props.visible}
       style={props.containerStyle}
-      onRequestClose={props.onRequestClose}>
+      onRequestClose={props.onRequestClose}
+    >
       <TouchableWithoutFeedback onPress={props.onRequestClose}>
         <View style={[styles.modalBack, props.modalBackStyle]}>
           <TouchableWithoutFeedback onPress={() => null}>
-            <View style={[styles.modalInner, props.modalInnerStyle]}>{props.children}</View>
+            <View style={[styles.modalInner, props.modalInnerStyle]}>
+              {props.children}
+            </View>
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   modalBack: {
     flex: 1,
     backgroundColor: AppGeneralColor.Modal.BaseBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   modalInner: {
     backgroundColor: AppGeneralColor.Modal.BaseInner,
-    width: '90%',
-    minHeight: '60%',
-    paddingHorizontal: '5%',
+    width: "90%",
+    paddingHorizontal: "5%",
+    paddingVertical: 32,
     borderRadius: 20,
   },
 });
-

@@ -6,6 +6,7 @@ import {
   updateCurrentUser,
   updateProfile,
   signOut,
+  sendPasswordResetEmail,
   onAuthStateChanged,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -46,5 +47,6 @@ export {
   updateCurrentUser,
   updateProfile,
   signOut,
+  sendPasswordResetEmail,
   onAuthStateChanged,
 };
