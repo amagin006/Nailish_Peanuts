@@ -7,11 +7,25 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 
 // redux
 import { useAppDispatch, useAppSelector } from "@src/store";
 import { confirmedError, userSelector } from "@src/store/user/userSlice";
-import { createUser, userLoginWithPass } from "@src/store/user/api";
+import {
+  createUser,
+  googleLogin,
+  userLoginWithPass,
+} from "@src/store/user/api";
+
+import {
+  GOOGLE_AUTH_IOS_CLIENT_ID,
+  GOOGLE_AUTH_ANDROID_CLIENT_ID,
+  GOOGLE_IOS_STANDALONE_CLIENT_ID,
+  GOOGLE_ANDROID_STANDALONE_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
+} from "@env";
 
 // component
 import { ButtonColors, RoundButton } from "@src/components/Button/Button";
@@ -27,6 +41,8 @@ import { ForgetPasswordModal } from "@src/screens/Login/components/ForgetPasswor
 import { AppGeneralColor } from "@src/styles/ColorStyle";
 import { FailedConfirmModal } from "@src/screens/Login/components/FailedConfirmModal";
 
+WebBrowser.maybeCompleteAuthSession();
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -38,6 +54,13 @@ const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(userSelector);
 
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: GOOGLE_AUTH_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_AUTH_ANDROID_CLIENT_ID,
+    expoClientId: GOOGLE_WEB_CLIENT_ID,
+    scopes: ["profile", "email"],
+  });
+
   const _onLoginWithEmail = () => {
     if (email && password) {
       dispatch(userLoginWithPass({ email, password }));
@@ -47,6 +70,7 @@ const Login: React.FC = () => {
   };
 
   const _googleLogin = () => {
+    promptAsync();
     // dispatch(googleLogin());
   };
 
@@ -141,6 +165,7 @@ const Login: React.FC = () => {
             <TouchableOpacity
               style={styles.googleSingButton}
               onPress={_googleLogin}
+              disabled={!request}
             >
               <Image
                 style={styles.googleImage}
